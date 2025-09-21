@@ -20,10 +20,12 @@ logging.basicConfig(
 )
 
 class DelhiAirQualityFetcher:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, openweather_api_key: str = None):
         self.api_key = api_key
+        self.openweather_api_key = openweather_api_key
         self.base_url = "https://api.data.gov.in/resource"
         self.resource_id = "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69"  # Air Quality Index resource ID
+        self.openweather_base_url = "https://api.openweathermap.org/data/2.5"
         self.headers = {
             'User-Agent': 'Delhi-Air-Quality-Fetcher/1.0',
             'Accept': 'application/json',
@@ -31,6 +33,7 @@ class DelhiAirQualityFetcher:
         }
         self.raw_data = []
         self.aggregated_data = []
+        self.weather_data = {}
         
     def construct_api_url(self, limit: int = 100, offset: int = 0, filters: Dict = None) -> str:
         """Construct the API URL with parameters"""
@@ -78,6 +81,89 @@ class DelhiAirQualityFetcher:
         except Exception as e:
             logging.error(f"Unexpected error at offset {offset}: {e}")
             return None
+    
+    def fetch_weather_data(self, lat: float, lon: float, station_name: str = "") -> Dict:
+        """Fetch current weather data for given coordinates"""
+        if not self.openweather_api_key:
+            return {}
+            
+        try:
+            # Current weather
+            current_url = f"{self.openweather_base_url}/weather"
+            current_params = {
+                'lat': lat,
+                'lon': lon,
+                'appid': self.openweather_api_key,
+                'units': 'metric'  # Celsius, m/s, etc.
+            }
+            
+            logging.info(f"Fetching weather for {station_name} ({lat}, {lon})")
+            current_response = requests.get(current_url, params=current_params, timeout=30)
+            current_response.raise_for_status()
+            current_data = current_response.json()
+            
+            # Air pollution data from OpenWeather (if available)
+            pollution_data = {}
+            try:
+                pollution_url = f"{self.openweather_base_url}/air_pollution"
+                pollution_params = {
+                    'lat': lat,
+                    'lon': lon,
+                    'appid': self.openweather_api_key
+                }
+                pollution_response = requests.get(pollution_url, params=pollution_params, timeout=30)
+                if pollution_response.status_code == 200:
+                    pollution_json = pollution_response.json()
+                    if 'list' in pollution_json and pollution_json['list']:
+                        pollution_data = pollution_json['list'][0]
+            except Exception as e:
+                logging.warning(f"Could not fetch pollution data from OpenWeather: {e}")
+            
+            # Extract relevant weather data
+            weather_info = {
+                'weather_timestamp': datetime.now().isoformat(),
+                'weather_main': current_data.get('weather', [{}])[0].get('main', ''),
+                'weather_description': current_data.get('weather', [{}])[0].get('description', ''),
+                'temperature': current_data.get('main', {}).get('temp'),
+                'feels_like': current_data.get('main', {}).get('feels_like'),
+                'humidity': current_data.get('main', {}).get('humidity'),
+                'pressure': current_data.get('main', {}).get('pressure'),
+                'visibility': current_data.get('visibility'),
+                'wind_speed': current_data.get('wind', {}).get('speed'),
+                'wind_direction': current_data.get('wind', {}).get('deg'),
+                'wind_gust': current_data.get('wind', {}).get('gust'),
+                'cloudiness': current_data.get('clouds', {}).get('all'),
+                'uv_index': None,  # Would need separate UV Index API call
+                'sunrise': current_data.get('sys', {}).get('sunrise'),
+                'sunset': current_data.get('sys', {}).get('sunset')
+            }
+            
+            # Add OpenWeather AQI if available
+            if pollution_data:
+                weather_info['openweather_aqi'] = pollution_data.get('main', {}).get('aqi')
+                components = pollution_data.get('components', {})
+                weather_info['ow_co'] = components.get('co')
+                weather_info['ow_no'] = components.get('no')
+                weather_info['ow_no2'] = components.get('no2')
+                weather_info['ow_o3'] = components.get('o3')
+                weather_info['ow_so2'] = components.get('so2')
+                weather_info['ow_pm25'] = components.get('pm2_5')
+                weather_info['ow_pm10'] = components.get('pm10')
+                weather_info['ow_nh3'] = components.get('nh3')
+            
+            return weather_info
+            
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Weather API error for {station_name}: {e}")
+            return {}
+        except Exception as e:
+            logging.error(f"Weather processing error for {station_name}: {e}")
+            return {}
+    
+    def get_delhi_general_weather(self) -> Dict:
+        """Get general weather for Delhi city center"""
+        delhi_lat, delhi_lon = 28.6139, 77.2090  # Delhi coordinates
+        return self.fetch_weather_data(delhi_lat, delhi_lon, "Delhi Center")
     
     def normalize_pollutant_name(self, pollutant_id: str) -> str:
         """Normalize pollutant names to standard format"""
@@ -185,6 +271,16 @@ class DelhiAirQualityFetcher:
                 'total_pollutants_monitored': len(station_info['pollutants'])
             }
             
+            # Add weather data if available
+            if self.openweather_api_key and station_info['latitude'] and station_info['longitude']:
+                weather_data = self.fetch_weather_data(
+                    station_info['latitude'], 
+                    station_info['longitude'], 
+                    station_info['station_name']
+                )
+                clean_record.update(weather_data)
+                time.sleep(0.5)  # Rate limiting for weather API
+            
             # Add pollutant data dynamically (only pollutants with data)
             for pollutant, data in station_info['pollutants'].items():
                 clean_record[f'{pollutant}_min'] = data['min']
@@ -243,7 +339,14 @@ class DelhiAirQualityFetcher:
         
         # Aggregate data by station
         logging.info("Aggregating data by station...")
+        if self.openweather_api_key:
+            logging.info("Weather data will be added for each station...")
         self.aggregated_data = self.aggregate_by_station(self.raw_data)
+        
+        # Add general Delhi weather data
+        if self.openweather_api_key:
+            logging.info("Fetching general Delhi weather...")
+            self.weather_data = self.get_delhi_general_weather()
         
         logging.info(f"Total raw records fetched: {len(self.raw_data)}")
         logging.info(f"Total stations aggregated: {len(self.aggregated_data)}")
@@ -258,7 +361,7 @@ class DelhiAirQualityFetcher:
             
         if not filename:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"delhi_air_quality_clean_{timestamp}.csv"
+            filename = f"delhi_air_weather_quality_clean_{timestamp}.csv"
         
         try:
             df = pd.DataFrame(self.aggregated_data)
@@ -306,7 +409,7 @@ class DelhiAirQualityFetcher:
             
         if not filename:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"delhi_air_quality_clean_{timestamp}.json"
+            filename = f"delhi_air_weather_quality_clean_{timestamp}.json"
         
         try:
             # Get pollutants that actually have data
@@ -323,9 +426,12 @@ class DelhiAirQualityFetcher:
                         'fetch_timestamp': datetime.now().isoformat(),
                         'total_stations': len(self.aggregated_data),
                         'pollutants_available': sorted(list(pollutants_with_data)),
+                        'weather_data_included': bool(self.openweather_api_key),
                         'source': 'https://www.data.gov.in/resource/real-time-air-quality-index-various-locations',
+                        'weather_source': 'OpenWeatherMap API' if self.openweather_api_key else None,
                         'data_description': 'Only stations and pollutants with actual measurement data included'
                     },
+                    'delhi_general_weather': self.weather_data,
                     'air_quality_data': self.aggregated_data
                 }, f, indent=2, ensure_ascii=False)
             
@@ -375,20 +481,29 @@ class DelhiAirQualityFetcher:
 
 def main():
     """Main execution function"""
-    # Replace with your actual API key
-    API_KEY = "Your_Api_Key"
+    # Replace with your actual API keys
+    API_KEY = "your_api"
+    OPENWEATHER_API_KEY = "your_openweather_api"  
     
     if API_KEY == "your_api":
         print("⚠️  Please replace 'your_api' with your actual API key from data.gov.in")
         print("You can get your API key from: https://www.data.gov.in/help/how-use-datasets-apis")
         return
     
+    if OPENWEATHER_API_KEY == "your_openweather_api":
+        print("⚠️  Please replace 'your_openweather_api' with your OpenWeather API key")
+        print("You can get your API key from: https://openweathermap.org/api")
+        print("Note: Script will work without weather data if you don't have OpenWeather API key")
+        OPENWEATHER_API_KEY = None
+    
     # Initialize the fetcher
-    fetcher = DelhiAirQualityFetcher(API_KEY)
+    fetcher = DelhiAirQualityFetcher(API_KEY, OPENWEATHER_API_KEY)
     
     try:
         # Fetch data (adjust max_records as needed)
         print("🔄 Fetching Delhi air quality data...")
+        if OPENWEATHER_API_KEY:
+            print("🌤️  Weather data will be included for each station")
         print("📝 Note: Each API record contains data for one pollutant per station")
         data = fetcher.fetch_all_data(max_records=5000)
         
@@ -406,6 +521,8 @@ def main():
         print("\n📊 Clean Data Summary:")
         print(f"Stations with pollutant data: {summary['unique_stations']}")
         print(f"Pollutants found: {', '.join(sorted(summary['pollutants_found']))}")
+        if OPENWEATHER_API_KEY:
+            print("🌤️  Weather data included for each station")
         
         print(f"\n🏭 Top Stations:")
         for station in summary['stations_list'][:5]:  # Show top 5 stations
@@ -426,6 +543,11 @@ def main():
         print("• Only PM2.5, PM10, O3, NO2, SO2, CO, NH3 data")
         print("• No empty columns or missing data fields")
         print("• Min, max, avg values with units for each pollutant")
+        if OPENWEATHER_API_KEY:
+            print("• Current weather data for each station location")
+            print("• Temperature, humidity, pressure, wind, visibility")
+            print("• Weather conditions and cloudiness")
+            print("• Optional: OpenWeather air quality data for comparison")
         
     except Exception as e:
         logging.error(f"Error in main execution: {e}")

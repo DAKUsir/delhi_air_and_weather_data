@@ -1,0 +1,54 @@
+2025-09-21 16:49:34,997 - INFO - Starting data fetch for Delhi air quality...
+2025-09-21 16:49:34,997 - INFO - Fetching data from offset 0, limit 100
+2025-09-21 16:49:36,663 - INFO - Fetched 100 records, total: 100
+2025-09-21 16:49:37,663 - INFO - Fetching data from offset 100, limit 100
+2025-09-21 16:49:39,326 - INFO - Fetched 100 records, total: 200
+2025-09-21 16:49:40,326 - INFO - Fetching data from offset 200, limit 100
+2025-09-21 16:49:41,040 - INFO - Fetched 40 records, total: 240
+2025-09-21 16:49:41,040 - INFO - Aggregating data by station...
+2025-09-21 16:49:41,041 - INFO - Weather data will be added for each station...
+2025-09-21 16:49:41,042 - INFO - Fetching weather for DTU, Delhi - CPCB (28.7500499, 77.1112615)
+2025-09-21 16:49:41,932 - INFO - Fetching weather for Dr. Karni Singh Shooting Range, Delhi - DPCC (28.498571, 77.26484)
+2025-09-21 16:49:42,856 - INFO - Fetching weather for Dwarka-Sector 8, Delhi - DPCC (28.5710274, 77.0719006)
+2025-09-21 16:49:43,784 - INFO - Fetching weather for IHBAS, Dilshad Garden, Delhi - CPCB (28.6811736, 77.3025234)
+2025-09-21 16:49:44,756 - INFO - Fetching weather for Alipur, Delhi - DPCC (28.815329, 77.15301)
+2025-09-21 16:49:46,758 - INFO - Fetching weather for Jahangirpuri, Delhi - DPCC (28.73282, 77.170633)
+2025-09-21 16:49:48,198 - INFO - Fetching weather for Jawaharlal Nehru Stadium, Delhi - DPCC (28.58028, 77.233829)
+2025-09-21 16:49:49,699 - INFO - Fetching weather for Major Dhyan Chand National Stadium, Delhi - DPCC (28.611281, 77.237738)
+2025-09-21 16:49:50,666 - INFO - Fetching weather for CRRI Mathura Road, Delhi - IMD (28.5512005, 77.2735737)
+2025-09-21 16:49:52,117 - INFO - Fetching weather for Chandni Chowk, Delhi - IITM (28.656756, 77.227234)
+2025-09-21 16:49:53,247 - INFO - Fetching weather for Bawana, Delhi - DPCC (28.7762, 77.051074)
+2025-09-21 16:49:54,157 - INFO - Fetching weather for Vivek Vihar, Delhi - DPCC (28.672342, 77.31526)
+2025-09-21 16:49:55,132 - INFO - Fetching weather for Wazirpur, Delhi - DPCC (28.699793, 77.165453)
+2025-09-21 16:49:56,098 - INFO - Fetching weather for Rohini, Delhi - DPCC (28.732528, 77.11992)
+2025-09-21 16:49:57,017 - INFO - Fetching weather for Shadipur, Delhi - CPCB (28.6514781, 77.1473105)
+2025-09-21 16:49:57,941 - INFO - Fetching weather for Sirifort, Delhi - CPCB (28.5504249, 77.2159377)
+2025-09-21 16:49:58,896 - INFO - Fetching weather for Sri Aurobindo Marg, Delhi - DPCC (28.531346, 77.190156)
+2025-09-21 16:49:59,804 - INFO - Fetching weather for Mandir Marg, Delhi - DPCC (28.636429, 77.201067)
+2025-09-21 16:50:00,719 - INFO - Fetching weather for NSIT Dwarka, Delhi - CPCB (28.60909, 77.0325413)
+2025-09-21 16:50:01,668 - INFO - Fetching weather for Najafgarh, Delhi - DPCC (28.570173, 76.933762)
+2025-09-21 16:50:02,620 - INFO - Fetching weather for Narela, Delhi - DPCC (28.822836, 77.101981)
+2025-09-21 16:50:04,411 - INFO - Fetching weather for Nehru Nagar, Delhi - DPCC (28.56789, 77.250515)
+2025-09-21 16:50:05,619 - INFO - Fetching weather for Okhla Phase-2, Delhi - DPCC (28.530785, 77.271255)
+2025-09-21 16:50:07,150 - INFO - Fetching weather for Patparganj, Delhi - DPCC (28.623763, 77.287209)
+2025-09-21 16:50:09,528 - INFO - Fetching weather for Punjabi Bagh, Delhi - DPCC (28.674045, 77.131023)
+2025-09-21 16:50:11,107 - INFO - Fetching weather for Pusa, Delhi - DPCC (28.639652, 77.146275)
+2025-09-21 16:50:12,806 - INFO - Fetching weather for R K Puram, Delhi - DPCC (28.563262, 77.186937)
+2025-09-21 16:50:14,856 - INFO - Fetching weather for IGI Airport (T3), Delhi - IMD (28.5627763, 77.1180053)
+2025-09-21 16:50:16,698 - INFO - Fetching weather for ITO, Delhi - CPCB (28.628624, 77.24106)
+2025-09-21 16:50:20,389 - INFO - Fetching weather for Anand Vihar, Delhi - DPCC (28.647622, 77.315809)
+2025-09-21 16:50:22,024 - INFO - Fetching weather for Ashok Vihar, Delhi - DPCC (28.695381, 77.181665)
+2025-09-21 16:50:23,780 - INFO - Fetching weather for Aya Nagar, Delhi - IMD (28.4706914, 77.1099364)
+2025-09-21 16:50:26,134 - INFO - Fetching weather for Mundka, Delhi - DPCC (28.684678, 77.076574)
+2025-09-21 16:50:27,043 - INFO - Fetching weather for Sonia Vihar, Delhi - DPCC (28.710508, 77.249485)
+2025-09-21 16:50:28,784 - INFO - Fetching weather for North Campus, DU, Delhi - IMD (28.6573814, 77.1585447)
+2025-09-21 16:50:30,161 - INFO - Fetching weather for Pusa, Delhi - IMD (28.63611, 77.173332)
+2025-09-21 16:50:32,566 - INFO - Fetching general Delhi weather...
+2025-09-21 16:50:32,567 - INFO - Fetching weather for Delhi Center (28.6139, 77.209)
+2025-09-21 16:50:33,322 - INFO - Total raw records fetched: 240
+2025-09-21 16:50:33,322 - INFO - Total stations aggregated: 36
+2025-09-21 16:50:33,333 - INFO - Clean data saved to delhi_air_weather_quality_clean_20250921_165033.csv
+2025-09-21 16:50:33,333 - INFO - Total stations with data: 36
+2025-09-21 16:50:33,333 - INFO - Total columns: 54
+2025-09-21 16:50:33,334 - INFO - Pollutants with data: CO, NH3, NO2, PM10, PM25, SO2
+2025-09-21 16:50:33,339 - INFO - Clean data saved to delhi_air_weather_quality_clean_20250921_165033.json
